@@ -1,0 +1,46 @@
+---
+#
+# Repo for RHEL/CentOS/Alma/Rocky
+- name: Add repo in RHEL style
+  become: true
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+  block:
+    - name: Import EPEL repo key
+      ansible.builtin.rpm_key:
+        key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+        state: present
+
+    - name: Install EPEL repo
+      ansible.builtin.dnf:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+        state: present
+
+    - name: Import Remi repo key
+      ansible.builtin.rpm_key:
+        key: "https://rpms.remirepo.net/enterprise/{{ ansible_distribution_major_version }}/RPM-GPG-KEY-remi"
+        state: present
+
+    - name: Install Remi repo
+      ansible.builtin.dnf:
+        name: http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+        state: present
+        enablerepo: "remi,remi-php83"
+
+    - name: Install LAMP
+      ansible.builtin.dnf:
+        name:
+          - php83
+          - php83-php-fpm
+          - httpd
+          - mariadb-server
+          - mc
+        state: present
+      notify:
+        - start httpd
+        - start mariadb
+
+    - name: Create symlinks from php to actual PHP binary
+      ansible.builtin.dnf:
+        name:
+          - php83-syspaths
+        state: present

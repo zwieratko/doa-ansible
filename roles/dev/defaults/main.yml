@@ -1,0 +1,13 @@
+---
+# defaults file for dev
+docker_repo_uris: https://download.docker.com/linux/ubuntu
+docker_repo_key_url: https://download.docker.com/linux/ubuntu/gpg
+# docker_repo_key_file: /etc/apt/keyrings/docker.asc
+
+packages_list:
+  - git
+  - docker-ce
+
+docker_users:
+  - "{{ ansible_user_id }}"
+  - root

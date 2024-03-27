@@ -1,0 +1,2 @@
+ansible_connection: local
+ansible_become_pass: "{{ ubuntu_become_pass }}"

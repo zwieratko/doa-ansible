@@ -1,0 +1,25 @@
+---
+- name: Complex install
+  hosts:
+    - debian
+  vars:
+    my_webserver:
+      - caddy
+  # become: true
+  gather_facts: true
+
+  tasks:
+    - name: Install webserver
+      become: true
+      ansible.builtin.apt:
+        name: "{{ my_webserver }}"
+        state: present
+        update_cache: yes
+
+    - name: Copy default config
+      debug: msg="Akoze kopirujem :)"
+
+    - name: Ensure caddy is running
+      service:
+        name: caddy
+        state: started

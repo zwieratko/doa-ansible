@@ -1,0 +1,13 @@
+---
+- name: Testing playbook
+  hosts:
+    - servers
+  # become: true
+  gather_facts: false
+
+  tasks:
+    - name: Install cmatrix
+      apt:
+        name: cmatrix
+        state: present
+      become: true

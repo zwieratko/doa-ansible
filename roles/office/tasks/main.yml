@@ -1,0 +1,11 @@
+---
+# tasks file for office
+- name: Install packages for administrative group
+  become: true
+  ansible.builtin.apt:
+    name: "{{ packages_list }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  tags:
+    - packages

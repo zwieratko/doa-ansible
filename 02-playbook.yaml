@@ -1,0 +1,38 @@
+---
+- name: Testing playbook
+  hosts:
+    - servers
+  # become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check OS
+      debug: msg="{{ ansible_distribution }}"
+      tags:
+        - both
+
+    - name: Install cmatrix apt
+      become: true
+      ansible.builtin.apt:
+        name: brotli
+        state: present
+      notify:
+        - restart service
+      tags:
+        - packages-apt
+
+    - name: Install cmatrix dnf
+      become: true
+      ansible.builtin.dnf:
+        name: cmatrix
+        state: present
+      notify:
+        - restart service
+      tags:
+        - packages-dnf
+
+  handlers:
+    - name: restart service
+      debug: msg="Akoze restartujem sluzbu :)"
+      tags:
+        - both

@@ -1,0 +1,5 @@
+---
+# defaults file for office
+packages_list:
+  - pidgin
+  - libreoffice

@@ -1,0 +1,20 @@
+---
+# defaults file for common
+my_list_1:
+  - htop
+  - vim
+  - kazam
+  - php8.3
+  - filezilla
+  - bluefish
+my_list_2:
+  - ca-certificates
+  - apt-transport-https
+  - software-properties-common
+pictures_dir: "{{ ansible_user_dir }}/Pictures"
+bg_url: "https://cdn.wallpapersafari.com/55/73/ghY4rc.jpg"
+bg_dest_filename: bg.jpg
+servers:
+  - galaxy
+  - vulcan
+  - ameros

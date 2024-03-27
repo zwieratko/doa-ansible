@@ -1,0 +1,68 @@
+---
+# tasks file for dev
+- name: Run the equivalent of "apt-get update" as a separate step
+  become: true
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+
+- name: Update all packages to their latest version
+  become: true
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+# - name: Download docker repo key
+#   become: true
+#   ansible.builtin.get_url:
+#     url: "{{ docker_repo_key_url }}"
+#     dest: "{{ docker_repo_key_file }}"
+#     mode: "0644"
+#   tags:
+#     - downloadRepoKey
+
+# - name: Add an Apt signing key, uses whichever key is at the URL
+#   ansible.builtin.apt_key:
+#     url: "{{ docker_repo_key_url }}"
+#     state: present
+
+- name: Add repo using key from URL
+  become: true
+  ansible.builtin.deb822_repository:
+    name: example
+    types: deb
+    uris: "{{ docker_repo_uris }}"
+    suites: "{{ ansible_distribution_release }}"
+    components: stable
+    architectures: amd64
+    signed_by: "{{ docker_repo_key_url }}"
+
+- name: Run the equivalent of "apt-get update" as a separate step
+  become: true
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install packages for development group
+  become: true
+  ansible.builtin.apt:
+    name: "{{ packages_list }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  tags:
+    - packages
+  # notify: Start docker daemon
+
+- name: Start docker daemon
+  become: true
+  ansible.builtin.service:
+    name: docker
+    state: started
+
+- name: Appending the group 'docker' to the user's groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users }}"

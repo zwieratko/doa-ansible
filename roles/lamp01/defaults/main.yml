@@ -1,0 +1,12 @@
+---
+# defaults file for lamp01
+my_list_1:
+  - ca-certificates
+  - apt-transport-https
+  - software-properties-common
+my_list_2:
+  - apache2
+  - php8.3
+  - php8.3-mysql
+  - mariadb-server
+  - mariadb-client

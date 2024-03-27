@@ -1,0 +1,119 @@
+---
+# tasks file for dbconfig01
+
+# Install PHPMyAdmin for Debian/Ubuntu
+- name: Install phpmyadmin
+  become: true
+  ansible.builtin.apt:
+    name:
+      - phpmyadmin
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  # notify:
+  #   - start apache2
+  #   - start mariadb
+  tags:
+    - packages
+
+- name: Include phpmyadmin config into the apache2 config
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/apache2/apache2.conf
+    # regexp: '^SELINUX='
+    line: Include /etc/phpmyadmin/apache.conf
+    state: present
+  notify:
+    - start apache2
+  tags:
+    - packages
+
+- name: Install pip
+  become: true
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  tags:
+    - pip
+
+- name: Install PyMySQL python package
+  become: true
+  ansible.builtin.pip:
+    name:
+      - PyMySQL
+      # - mysqlclient
+    state: present
+  tags:
+    - pip
+
+- name: Check if /root/.my.cnf exists
+  become: true
+  ansible.builtin.stat:
+    path: /root/.my.cnf
+  register: mycnf_file
+  tags:
+    - password
+
+- name: Check if /root/.my.cnf exists - debug
+  debug: msg="File /root/.my.cnf already exists"
+  when: mycnf_file.stat.exists
+  tags:
+    - password
+
+- name: Generate new password only once and only if /root/.my.cnf doesnt exists
+  when: mycnf_file.stat.exists != true
+  block:
+    - name: Generate new password
+      ansible.builtin.shell: /usr/bin/openssl rand -base64 12
+      register: new_password
+      tags:
+        - password
+
+    - name: Show new password
+      debug: msg="New password -> {{ new_password.stdout }}"
+      tags:
+        - password
+
+    - name: Copy using inline content - just for sure
+      ansible.builtin.copy:
+        content: "{{ new_password.stdout }}"
+        dest: /home/ubuntu/DT/.my.cnf
+      tags:
+        - password
+
+    - name: Template a file to /root/.my.cnf
+      become: true
+      ansible.builtin.template:
+        src: my.cnf.j2
+        dest: /root/.my.cnf
+        owner: root
+        group: root
+        mode: "0600"
+      tags:
+        - password
+
+    - name: Example using login_unix_socket to connect to server
+      become: true
+      community.mysql.mysql_user:
+        name: root
+        password: "{{ new_password.stdout }}"
+        priv: '*.*:ALL,GRANT'
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        column_case_sensitive: false
+
+- name: Removes all anonymous user accounts DB
+  become: true
+  community.mysql.mysql_user:
+    name: ''
+    host_all: true
+    state: absent
+    column_case_sensitive: false
+
+- name: Delete database with name 'test'
+  become: true
+  community.mysql.mysql_db:
+    name: test
+    state: absent

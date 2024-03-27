@@ -1,0 +1,19 @@
+---
+- name: Management group playbook
+  hosts:
+    - ubuntu
+  # become: true
+
+  gather_facts: true
+
+  vars_files:
+    - vars/secrets.yaml
+
+  vars:
+    bg_url: "https://thumbs.dreamstime.com/z/colorful-graphs-charts-marketing-research-business-annual-report-background-management-project-budget-planning-financial-68703388.jpg"
+    bg_dest_filename: bg-management.jpg
+
+  roles:
+    - common
+    - dev
+    - office

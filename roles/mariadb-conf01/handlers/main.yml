@@ -1,0 +1,19 @@
+---
+# handlers file for dbconfig01
+- name: start apache2
+  become: true
+  service:
+    name: apache2
+    state: restarted
+
+- name: start httpd
+  become: true
+  service:
+    name: httpd
+    state: restarted
+
+- name: start mariadb
+  become: true
+  service:
+    name: mariadb
+    state: restarted

@@ -1,0 +1,29 @@
+---
+# tasks file for lamp01
+- include_tasks: debian.yml
+  when: ansible_os_family == "Debian"
+
+- include_tasks: redhat.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Template a file index.html
+  become: true
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    # owner: ubuntu
+    # group: ubuntu
+    # mode: "0644"
+  tags:
+    - createTemplate
+
+- name: Template a file index.php
+  become: true
+  ansible.builtin.template:
+    src: index.php.j2
+    dest: /var/www/html/index.php
+    # owner: ubuntu
+    # group: ubuntu
+    # mode: "0644"
+  tags:
+    - createTemplate

@@ -1,0 +1,75 @@
+---
+# tasks file for common
+- name: Install prereq
+  become: true
+  ansible.builtin.apt:
+    name: "{{ my_list_2 }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  tags:
+    - packages
+
+- name: Add repo
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "ppa:ondrej/php"
+    state: present
+  tags:
+    - packages
+
+- name: Install PHP 8.3
+  become: true
+  ansible.builtin.apt:
+    name: "{{ my_list_1 }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600 # cache repos for 1 hour
+  tags:
+    - packages
+
+- name: Create a directory Pictures if it does not exist
+  ansible.builtin.file:
+    path: "{{ pictures_dir }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - creatingDirs
+    - background
+
+- name: Download some pic to directory Pictures
+  ansible.builtin.get_url:
+    url: "{{ bg_url }}"
+    dest: "{{ pictures_dir }}/{{ bg_dest_filename }}"
+    mode: "0644"
+  tags:
+    - downloadFiles
+    - background
+
+- name: Check ansible variables
+  debug: msg="CPU of machine {{ ansible_hostname }} {{ ":" }} {{ ansible_processor[2] }}"
+  tags:
+    - test
+
+- name: Template a file cpu.txt to user home dir
+  ansible.builtin.template:
+    src: /home/ubuntu/cpu.txt.j2
+    dest: /home/ubuntu/cpu.txt
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  tags:
+    - createTemplate
+    - background
+
+- name: Template a file <server>.txt to /temp dir
+  ansible.builtin.template:
+    src: /home/ubuntu/servers.txt.j2
+    dest: "/tmp/{{ item }}.txt"
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  loop: "{{ servers }}"
+  tags:
+    - createTemplate
+    - background
